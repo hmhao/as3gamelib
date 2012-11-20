@@ -1,9 +1,11 @@
 package com.as3game.sound
 {
+	import flash.media.Sound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
+	import flash.utils.getDefinitionByName;
 	
 	/**
 	 * 游戏声音管理类：管理游戏中的背景音乐、按钮等点击声效
@@ -28,10 +30,32 @@ package com.as3game.sound
 			return m_instance;
 		}
 		
-		public function playSound(name:String, offset:Number = 0, loops:int = 0, //
+		/**
+		 *
+		 * @param	name	:	String 
+		 * @param	startTime	:	Number 应开始回放的初始位置（以毫秒为单位）
+		 * @param	loops	:	int 定义在声道停止回放之前，声音循环回 startTime 值的次数
+		 * @param	transform	:	SoundTransform 分配给该声道的初始 SoundTransform 对象
+		 * @param	applicationDomain
+		 * @return
+		 */
+		public function playSound(name:String, offset:Number = 0, startTime:int = 0, //
 			transform:SoundTransform = null, applicationDomain:ApplicationDomain = null):SoundChannel
 		{
-		
+			if (!m_soundDic[name]) 
+			{
+				//声音不存在，创建声音对象SoundObject
+				var sound:Sound;
+				var soundCls:Class;
+				try 
+				{
+					soundCls = (applicationDomain != null)?applicationDomain.getDefinition(name) as Class:getDefinitionByName(name) as Class;
+				}
+				catch (err:ReferenceError)
+				{
+					
+				}
+			}
 		}
 		
 		public function stopSound(name:String = null):void
@@ -46,11 +70,12 @@ package com.as3game.sound
 				throw new Error("GameSound is a Singleton class. Use getInstance() to retrieve the existing instance.");
 			}
 			
-			m_instance = new Dictionary(true);
+			m_soundDic = new Dictionary(true);
 		}
 		
 		private static var m_instance:GameSound; //实例对象
-		private var m_soundList:Dictionary;
+		
+		private var m_soundDic:Dictionary;
 	}
 
 }
