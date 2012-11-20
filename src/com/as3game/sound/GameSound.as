@@ -19,19 +19,6 @@ package com.as3game.sound
 	 */
 	public class GameSound
 	{
-		private static var m_instance:GameSound; //实例对象
-		private var m_soundList:Dictionary;
-		
-		public function GameSound(pvt:PrivateClass)
-		{
-			if (m_instance)
-			{
-				throw new Error("GameSound is a Singleton class. Use getInstance() to retrieve the existing instance.");
-			}
-			
-			m_instance = new Dictionary(true);
-		}
-		
 		public function getInstance():GameSound
 		{
 			if (!m_instance)
@@ -51,6 +38,19 @@ package com.as3game.sound
 		{
 		
 		}
+		
+		public function GameSound(pvt:PrivateClass)
+		{
+			if (m_instance)
+			{
+				throw new Error("GameSound is a Singleton class. Use getInstance() to retrieve the existing instance.");
+			}
+			
+			m_instance = new Dictionary(true);
+		}
+		
+		private static var m_instance:GameSound; //实例对象
+		private var m_soundList:Dictionary;
 	}
 
 }
