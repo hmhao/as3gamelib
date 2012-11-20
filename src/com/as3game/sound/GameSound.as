@@ -32,7 +32,7 @@ package com.as3game.sound
 		
 		/**
 		 *
-		 * @param	name	:	String 
+		 * @param	name	:	String
 		 * @param	startTime	:	Number 应开始回放的初始位置（以毫秒为单位）
 		 * @param	loops	:	int 定义在声道停止回放之前，声音循环回 startTime 值的次数
 		 * @param	transform	:	SoundTransform 分配给该声道的初始 SoundTransform 对象
@@ -42,18 +42,18 @@ package com.as3game.sound
 		public function playSound(name:String, offset:Number = 0, startTime:int = 0, //
 			transform:SoundTransform = null, applicationDomain:ApplicationDomain = null):SoundChannel
 		{
-			if (!m_soundDic[name]) 
+			if (!m_soundDic[name])
 			{
 				//声音不存在，创建声音对象SoundObject
 				var sound:Sound;
 				var soundCls:Class;
-				try 
+				try
 				{
-					soundCls = (applicationDomain != null)?applicationDomain.getDefinition(name) as Class:getDefinitionByName(name) as Class;
+					soundCls = (applicationDomain != null) ? applicationDomain.getDefinition(name) as Class : getDefinitionByName(name) as Class;
 				}
 				catch (err:ReferenceError)
 				{
-					
+					trace("找不到" + name + "指定的声音对象，尝试加载外部文件。");
 				}
 			}
 		}
