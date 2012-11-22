@@ -8,9 +8,11 @@ package com.as3game.asset
 	{
 		public function AssetProperty() 
 		{
-			
+			//
 		}
 		
+		private var m_groupName:String;
+		//private 
 	}
 
 }
