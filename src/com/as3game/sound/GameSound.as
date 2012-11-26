@@ -1,5 +1,6 @@
 package com.as3game.sound
 {
+	import com.as3game.asset.AssetManager;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
@@ -21,7 +22,7 @@ package com.as3game.sound
 	 */
 	public class GameSound
 	{
-		public function getInstance():GameSound
+		public static function getInstance():GameSound
 		{
 			if (!m_instance)
 			{
@@ -33,13 +34,13 @@ package com.as3game.sound
 		/**
 		 *
 		 * @param	name	:	String
-		 * @param	startTime	:	Number 应开始回放的初始位置（以毫秒为单位）
+		 * @param	offset	:	Number 应开始回放的初始位置（以毫秒为单位）
 		 * @param	loops	:	int 定义在声道停止回放之前，声音循环回 startTime 值的次数
 		 * @param	transform	:	SoundTransform 分配给该声道的初始 SoundTransform 对象
 		 * @param	applicationDomain
 		 * @return
 		 */
-		public function playSound(name:String, offset:Number = 0, startTime:int = 0, //
+		public function playSound(name:String, offset:Number = 0, loops:int = 0, //
 			transform:SoundTransform = null, applicationDomain:ApplicationDomain = null):SoundChannel
 		{
 			if (!m_soundDic[name])
@@ -55,12 +56,106 @@ package com.as3game.sound
 				{
 					trace("找不到" + name + "指定的声音对象，尝试加载外部文件。");
 				}
+				
+				if (soundCls)
+				{
+					sound = new soundCls() as Sound;
+					m_soundDic[name] = sound;
+					
+					var channel:SoundChannel = m_soundDic[name].play(offset, loops, transform);
+					if (channel == null)
+					{
+						return null;
+					}
+					return channel;
+				}
+				else
+				{
+					AssetManager.getInstance().getAsset(name, function():SoundChannel
+						{
+							sound = AssetManager.getInstance().bulkLoader.getSound(name);
+							m_soundDic[name] = sound;
+							
+							var channel:SoundChannel = m_soundDic[name].play(offset, loops, transform);
+							if (channel == null)
+							{
+								return null;
+							}
+							return channel;
+						});
+					return null;
+				}
+			}
+			else
+			{
+				return null;
 			}
 		}
 		
+		/**
+		 *
+		 * @param	name
+		 */
 		public function stopSound(name:String = null):void
 		{
+			if (name)
+			{
+				if (m_soundDic[name])
+				{
+					m_soundDic[name].stop();
+				}
+				else
+				{
+					trace("sound " + name + "不存在");
+				}
+			}
+			else
+			{
+				for each (var item:SoundObject in m_soundDic)
+				{
+					item.stop();
+				}
+			}
+		}
 		
+		/**
+		 *
+		 * @param	value
+		 * @param	name
+		 */
+		public function setVolume(value:Number, name:String = null):void
+		{
+			if (name)
+			{
+				if (m_soundDic[name])
+				{
+					m_soundDic[name].volume = Math.max(0, Math.min(1, value));
+				}
+				else
+				{
+					trace("sound " + name + "不存在");
+				}
+			}
+			else
+			{
+				for each (var item:SoundObject in m_soundDic)
+				{
+					item.volume = Math.max(0, Math.min(1, value));
+				}
+			}
+		}
+		
+		public function getVolume(name:String):Number
+		{
+			if (m_soundDic[name])
+			{
+				return m_soundDic[name].volume;
+			}
+			else
+			{
+				throw new Error("Sound " + name + " 不存在");
+			}
+			return 0;
 		}
 		
 		public function GameSound(pvt:PrivateClass)

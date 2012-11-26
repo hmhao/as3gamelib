@@ -19,6 +19,7 @@ package com.as3game.sound
 			m_sound = sound;
 			
 			m_playing = false;
+			m_muted = false;
 			m_paused = false;
 		}
 		
@@ -71,9 +72,142 @@ package com.as3game.sound
 			return m_playing;
 		}
 		
-		private function complete(e:Event):void 
+		public function get volume():Number
 		{
-			m_channel.removeEventListener(Event.SOUND_COMPLETE, play, false, 0, true);
+			if (m_channel != null)
+			{
+				return m_channel.soundTransform.volume;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		
+		public function set volume(value:Number):void
+		{
+			if (m_channel != null)
+			{
+				var tf:SoundTransform = m_transform;
+				tf.volume = value;
+				m_transform = tf;
+				if (!m_muted)
+					m_channel.soundTransform = m_transform;
+			}
+		}
+		
+		public function get pan():Number
+		{
+			if (m_channel != null)
+			{
+				return m_channel.soundTransform.pan;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		
+		public function set pan(value:Number):void
+		{
+			if (m_channel != null)
+			{
+				var tf:SoundTransform = m_transform;
+				tf.pan = value;
+				m_transform = tf;
+				if (!m_muted)
+					m_channel.soundTransform = m_transform;
+			}
+		}
+		
+		public function get transform():SoundTransform
+		{
+			if (m_channel != null)
+			{
+				return m_channel.soundTransform;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		
+		public function set transform(value:SoundTransform):void
+		{
+			if (m_channel != null)
+			{
+				m_transform = value;
+				if (!m_muted)
+					m_channel.soundTransform = m_transform;
+			}
+		}
+		
+		public function mute():void
+		{
+			if (m_channel != null)
+			{
+				if (m_muted)
+				{
+					m_channel.soundTransform = m_transform;
+				}
+				else
+				{
+					m_channel.soundTransform = new SoundTransform(0, 0);
+				}
+			}
+			m_muted = !m_muted;
+		}
+		
+		public function turnMuteOn():void
+		{
+			if (m_channel != null)
+			{
+				m_channel.soundTransform = new SoundTransform(0, 0);
+			}
+			m_muted = true;
+		}
+		
+		public function turnMuteOff():void
+		{
+			if (m_channel != null)
+			{
+				m_channel.soundTransform = m_transform;
+			}
+			m_muted = false;
+		}
+		
+		public function get isMuted():Boolean
+		{
+			return m_muted;
+		}
+		
+		public function pause():void
+		{
+			if (m_channel != null)
+			{
+				if (m_paused)
+				{
+					var normalOffset:Number = m_offset;
+					play(m_pauseTime, m_loops, m_transform);
+					m_offset = normalOffset;
+				}
+				else
+				{
+					m_pauseTime = m_channel.position;
+					m_channel.stop();
+				}
+			}
+			m_paused = !m_paused;
+		}
+		
+		public function get isPaused():Boolean
+		{
+			return m_paused;
+		}
+		
+		private function complete(e:Event):void
+		{
+			m_channel.removeEventListener(Event.SOUND_COMPLETE, play, false);
 			m_playing = false;
 		}
 		
@@ -82,7 +216,9 @@ package com.as3game.sound
 		private var m_channel:SoundChannel;
 		private var m_transform:SoundTransform;
 		private var m_playing:Boolean;
+		private var m_muted:Boolean;
 		private var m_paused:Boolean;
+		private var m_pauseTime:Number;
 		private var m_loops:uint;
 		private var m_offset:Number;
 	}
