@@ -43,6 +43,7 @@ package com.as3game.sound
 		public function playSound(name:String, offset:Number = 0, loops:int = 0, //
 			transform:SoundTransform = null, applicationDomain:ApplicationDomain = null):SoundChannel
 		{
+			var channel:SoundChannel = null;
 			if (!m_soundDic[name])
 			{
 				//声音不存在，创建声音对象SoundObject
@@ -60,36 +61,25 @@ package com.as3game.sound
 				if (soundCls)
 				{
 					sound = new soundCls() as Sound;
-					m_soundDic[name] = sound;
-					
-					var channel:SoundChannel = m_soundDic[name].play(offset, loops, transform);
-					if (channel == null)
-					{
-						return null;
-					}
-					return channel;
+					m_soundDic[name] = new SoundObject(name, sound);
+					channel = m_soundDic[name].play(offset, loops, transform);
 				}
 				else
 				{
-					AssetManager.getInstance().getAsset(name, function():SoundChannel
+					AssetManager.getInstance().getAsset(name, function():void
 						{
 							sound = AssetManager.getInstance().bulkLoader.getSound(name);
-							m_soundDic[name] = sound;
-							
-							var channel:SoundChannel = m_soundDic[name].play(offset, loops, transform);
-							if (channel == null)
-							{
-								return null;
-							}
-							return channel;
+							m_soundDic[name] = new SoundObject(name, sound);
+							channel = m_soundDic[name].play(offset, loops, transform);
 						});
-					return null;
 				}
 			}
 			else
 			{
-				return null;
+				channel = m_soundDic[name].play(offset, loops, transform);
 			}
+			
+			return channel;
 		}
 		
 		/**
@@ -158,6 +148,185 @@ package com.as3game.sound
 			return 0;
 		}
 		
+		public function getChannel(name:String):SoundChannel
+		{
+			if (m_soundDic[name])
+			{
+				return m_soundDic[name].channel;
+			}
+			else
+			{
+				throw new Error("Sound " + name + " does not exist.");
+			}
+			return null;
+		}
+		
+		/**
+		 * Mutes/unmutes the given sound, or all sounds in the Engine.
+		 * @param	name	String	The name of the sound to mute/unmute. Leave out to act on all sounds in the Engine.
+		 */
+		public function mute(name:String = null):void
+		{
+			if (name)
+			{
+				if (m_soundDic[name])
+				{
+					m_soundDic[name].mute();
+					if (!m_soundDic[name].isMuted)
+						m_allMuted = false;
+				}
+				else
+				{
+					throw new Error("Sound " + name + " does not exist.");
+				}
+			}
+			else
+			{
+				m_allMuted = !m_allMuted;
+				if (m_allMuted)
+				{
+					for each (var i:SoundObject in m_soundDic)
+					{
+						i.turnMuteOn();
+					}
+				}
+				else
+				{
+					for each (var j:SoundObject in m_soundDic)
+					{
+						j.turnMuteOff();
+					}
+				}
+			}
+		}
+		
+		public function turnAllSoundsOn():void
+		{
+			if (m_allMuted)
+			{
+				mute();
+			}
+		}
+		
+		public function turnAllSoundsOff():void
+		{
+			if (!m_allMuted)
+			{
+				mute();
+			}
+		}
+		
+		/**
+		 * Pauses/resumes the given sound, or all sounds in the Engine.
+		 * @param	name	String	The name of the sound to pause or resume. Leave out to act on all sounds in the Engine.
+		 */
+		public function pauseSound(name:String = null):void
+		{
+			if (name)
+			{
+				if (m_soundDic[name])
+				{
+					m_soundDic[name].pause();
+				}
+				else
+				{
+					throw new Error("Sound " + name + " does not exist.");
+				}
+			}
+			else
+			{
+				for each (var i:String in m_soundDic)
+					m_soundDic[i].pause();
+			}
+		}
+		
+		/**
+		 * Returns whether or not a given sound is currently playing.
+		 * @param	name	String		The name of the sound to check.
+		 * @return			Boolean		True if playing, false otherwise. If a sound is only paused, it will still return as playing.
+		 */
+		public function isPlaying(name:String):Boolean
+		{
+			if (m_soundDic[name])
+			{
+				return m_soundDic[name].playing;
+			}
+			else
+			{
+				trace("Sound " + name + " does not exist.");
+			}
+			return false;
+		}
+		
+		/**
+		 * Returns whether or not a given sound is currently paused.
+		 * @param	name	String		The name of the sound to check.
+		 * @return			Boolean		True if sound is paused, false otherwise.
+		 */
+		public function isPaused(name:String):Boolean
+		{
+			if (m_soundDic[name])
+			{
+				return m_soundDic[name].isPaused;
+			}
+			else
+			{
+				throw new Error("Sound " + name + " does not exist.");
+			}
+			return false;
+		}
+		
+		/**
+		 * Returns whether or not a given sound is muted.
+		 * @param	name	String		The name of the sound to check.
+		 * @return			Boolean		True if muted, false otherwise.
+		 */
+		public function isMuted(name:String = null):Boolean
+		{
+			if (name)
+			{
+				if (m_soundDic[name])
+				{
+					return m_soundDic[name].isMuted;
+				}
+				else
+				{
+					throw new Error("Sound " + name + " does not exist.");
+				}
+				return false;
+			}
+			else
+			{
+				return m_allMuted;
+			}
+			return true;
+		}
+		
+		/**
+		 * Disposes of all objects and cleans up memory
+		 *
+		 * @param null
+		 * @return void
+		 */
+		public function dispose():void
+		{
+			// Stops All Sounds
+			m_instance.stopSound();
+			
+			// Null Out All Sound Objects
+			for (var i:String in m_soundDic)
+			{
+				m_soundDic[i] = null;
+			}
+			
+			// Nulls Out _soundList
+			m_soundDic = null;
+			
+			// Nulls Out _instance
+			m_instance = null;
+		
+		}
+		
 		public function GameSound(pvt:PrivateClass)
 		{
 			if (m_instance)
@@ -166,11 +335,13 @@ package com.as3game.sound
 			}
 			
 			m_soundDic = new Dictionary(true);
+			m_allMuted = false;
 		}
 		
 		private static var m_instance:GameSound; //实例对象
 		
 		private var m_soundDic:Dictionary;
+		private var m_allMuted:Boolean;
 	}
 
 }

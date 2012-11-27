@@ -2,8 +2,10 @@ package
 {
 	import com.as3game.asset.AssetManager;
 	import com.as3game.sound.GameSound;
+	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.media.Sound;
 	import flash.utils.setInterval;
@@ -27,16 +29,35 @@ package
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
-			GameSound.getInstance().playSound("res/sizetest.mp3");
-			//AssetManager.getInstance().getAsset("res/sizetest.mp3", test1);
-			AssetManager.getInstance().getGroupAssets("group1", ["res/loading.swf", "res/testsound.swf", "res/game.swf"], test2);
+			stage.addEventListener(MouseEvent.CLICK, backGroundMusic);
+			
+			GameSound.getInstance().playSound("res/music/background1.mp3");
+			AssetManager.getInstance().getAsset("res/MainView.swf", function ():void 
+			{
+				var mc:MovieClip = AssetManager.getInstance().getMovieClipByName("MainView.ToolsBar");
+				mc && addChild(mc);
+			});
+		}
+		
+		private function backGroundMusic(e:MouseEvent):void 
+		{
+			var flag:Boolean = GameSound.getInstance().isPlaying("res/music/background1.mp3");
+			trace("background music flag ", flag);
+			if (flag) 
+			{
+				GameSound.getInstance().pauseSound("res/music/background1.mp3");
+			}
+			else 
+			{
+				GameSound.getInstance().playSound("res/music/background1.mp3");
+			}
 		}
 		
 		private function test1(content:*):void 
 		{
 			//var i:int = 1;
 			//trace("test1");
-			//var test:Sound = AssetManager.getInstance().bulkLoader.getSound("res/sizetest.mp3");
+			//var test:Sound = AssetManager.getInstance().bulkLoader.getSound("res/music/background1.mp3");
 			//test.play();
 		} 
 		

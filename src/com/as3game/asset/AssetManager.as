@@ -1,6 +1,7 @@
 package com.as3game.asset
 {
 	import br.com.stimuli.loading.BulkLoader;
+	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.media.SoundLoaderContext;
@@ -91,6 +92,27 @@ package com.as3game.asset
 			}
 		}
 		
+		public function getClassByName(clsName:String):Class
+		{
+			var cls:Class = null;
+			var appDomain:ApplicationDomain = ApplicationDomain.currentDomain;
+			if (appDomain.hasDefinition(clsName))
+			{
+				cls = appDomain.getDefinition(clsName) as Class;
+			}
+			return cls ? cls : null;
+		}
+		
+		public function getMovieClipByName(clsName:String):MovieClip
+		{
+			var cls:Class = getClassByName(clsName);
+			if (cls != null)
+			{
+				return new cls();
+			}
+			return null;
+		}
+		
 		public function get bulkLoader():BulkLoader
 		{
 			return m_bulkLoader;
@@ -112,12 +134,12 @@ package com.as3game.asset
 			delete m_items[request.url];
 			for each (var callback:Function in itemObj.callback)
 			{
-				if (callback.length ==2) 
+				if (callback.length == 2)
 				{
 					//一次加载一组资源
 					callback(itemObj.group, itemObj.groupCallback);
 				}
-				else 
+				else
 				{
 					callback(bulkLoader.getContent(request.url));
 				}
@@ -160,7 +182,7 @@ package com.as3game.asset
 		{
 			//失败的时候，删除错误的请求，否则m_items会越来越大，而且保存了回调函数的引用，相当于内存泄漏
 			var failItems:Array = bulkLoader.getFailedItems();
-			for each (var item:Object in failItems) 
+			for each (var item:Object in failItems)
 			{
 				delete m_items[item.url.url];
 			}

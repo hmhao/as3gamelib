@@ -67,7 +67,7 @@ package com.as3game.sound
 			}
 		}
 		
-		public function isPlaying():Boolean
+		public function get playing():Boolean
 		{
 			return m_playing;
 		}
