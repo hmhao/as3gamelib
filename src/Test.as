@@ -49,7 +49,7 @@ package
 			}
 			else 
 			{
-				GameSound.getInstance().playSound("res/music/background1.mp3");
+				GameSound.getInstance().pauseSound("res/music/background1.mp3");
 			}
 		}
 		
@@ -63,7 +63,6 @@ package
 		
 		private function test2():void 
 		{
-			var j:int = 1;
 			trace("test2")
 			var game:* = AssetManager.getInstance().bulkLoader.getContent("res/game.swf");
 			addChild(game);

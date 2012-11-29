@@ -11,9 +11,6 @@ package com.as3game.sound
 	/**
 	 * 游戏声音管理类：管理游戏中的背景音乐、按钮等点击声效
 	 * 声音的播放，即将Sound.play()方法赋值给SoundChannel实例就可以开始播放歌曲了。
-	 * 如果使用Sound和SoundChannel装载和播放另一个mp3时，这个声音也会开始播放，因为没有对实例做任何限制，因此两个实例都可以正常播放。
-	 * 因此必须检测是否对SoundChannel实例赋值了，如果它是null，脚本继续执行并播放选择的文件；如果它不是null，先停止当前正在播放的文件
-	 * 后再装载和播放另一个mp3文件。这样就可以保证某一时刻只播放一个文件了。
 	 *
 	 * 游戏中声音有2两种：
 	 *         1. 背景音乐：循环播放一直存在
@@ -83,7 +80,7 @@ package com.as3game.sound
 		}
 		
 		/**
-		 *
+		 * 停止播放name指定声音
 		 * @param	name
 		 */
 		public function stopSound(name:String = null):void
@@ -109,7 +106,7 @@ package com.as3game.sound
 		}
 		
 		/**
-		 *
+		 * 设置name指定声音的大小
 		 * @param	value
 		 * @param	name
 		 */
@@ -135,6 +132,11 @@ package com.as3game.sound
 			}
 		}
 		
+		/**
+		 * 获取name指定声音的音量大小
+		 * @param	name
+		 * @return
+		 */
 		public function getVolume(name:String):Number
 		{
 			if (m_soundDic[name])
@@ -148,6 +150,11 @@ package com.as3game.sound
 			return 0;
 		}
 		
+		/**
+		 * 获取声音播放的声道
+		 * @param	name
+		 * @return
+		 */
 		public function getChannel(name:String):SoundChannel
 		{
 			if (m_soundDic[name])
@@ -162,8 +169,11 @@ package com.as3game.sound
 		}
 		
 		/**
-		 * Mutes/unmutes the given sound, or all sounds in the Engine.
-		 * @param	name	String	The name of the sound to mute/unmute. Leave out to act on all sounds in the Engine.
+		 * 对name指定声音设置静音或取消静音：
+		 * 	1. 当前为静音，则取消静音
+		 *  2. 当前为有声，则设置静音
+		 * 如果name为空，这对引擎中所有声音进行设置
+		 * @param	name	String	
 		 */
 		public function mute(name:String = null):void
 		{
@@ -200,6 +210,9 @@ package com.as3game.sound
 			}
 		}
 		
+		/**
+		 * 打开所有声音
+		 */
 		public function turnAllSoundsOn():void
 		{
 			if (m_allMuted)
@@ -208,6 +221,9 @@ package com.as3game.sound
 			}
 		}
 		
+		/**
+		 * 对所有声音设置静音
+		 */
 		public function turnAllSoundsOff():void
 		{
 			if (!m_allMuted)
@@ -217,8 +233,11 @@ package com.as3game.sound
 		}
 		
 		/**
-		 * Pauses/resumes the given sound, or all sounds in the Engine.
-		 * @param	name	String	The name of the sound to pause or resume. Leave out to act on all sounds in the Engine.
+		 * 对name指定声音暂停或继续播放
+		 *  1. 当前暂停，则继续播放
+		 *  2. 当前播放，则暂停播放
+		 * name为空则对引擎中所有声音进行设置
+		 * @param	name	String	
 		 */
 		public function pauseSound(name:String = null):void
 		{
@@ -241,9 +260,11 @@ package com.as3game.sound
 		}
 		
 		/**
-		 * Returns whether or not a given sound is currently playing.
-		 * @param	name	String		The name of the sound to check.
-		 * @return			Boolean		True if playing, false otherwise. If a sound is only paused, it will still return as playing.
+		 * 返回name指定声音是否正在播放
+		 * 如果name为空或这声音不存在，返回false
+		 * 如果声音只是暂停播放，也是返回true！！！
+		 * @param	name	String		
+		 * @return			Boolean		
 		 */
 		public function isPlaying(name:String):Boolean
 		{
@@ -259,9 +280,9 @@ package com.as3game.sound
 		}
 		
 		/**
-		 * Returns whether or not a given sound is currently paused.
-		 * @param	name	String		The name of the sound to check.
-		 * @return			Boolean		True if sound is paused, false otherwise.
+		 * 返回name指定声音是否暂停状态
+		 * @param	name	String		
+		 * @return			Boolean		
 		 */
 		public function isPaused(name:String):Boolean
 		{
@@ -277,9 +298,9 @@ package com.as3game.sound
 		}
 		
 		/**
-		 * Returns whether or not a given sound is muted.
-		 * @param	name	String		The name of the sound to check.
-		 * @return			Boolean		True if muted, false otherwise.
+		 * 返回name指定声音是否静音状态
+		 * @param	name	String		
+		 * @return			Boolean		
 		 */
 		public function isMuted(name:String = null):Boolean
 		{
@@ -303,26 +324,25 @@ package com.as3game.sound
 		}
 		
 		/**
-		 * Disposes of all objects and cleans up memory
-		 *
+		 * 销毁引擎单例，停止所有声音等
 		 * @param null
 		 * @return void
 		 */
 		public function dispose():void
 		{
-			// Stops All Sounds
+			// 停止所有声音
 			m_instance.stopSound();
 			
-			// Null Out All Sound Objects
+			// 把所有声音对象置空
 			for (var i:String in m_soundDic)
 			{
 				m_soundDic[i] = null;
 			}
 			
-			// Nulls Out _soundList
+			// 清空引擎管理的声音字典
 			m_soundDic = null;
 			
-			// Nulls Out _instance
+			// 单例置空
 			m_instance = null;
 		
 		}
@@ -350,6 +370,6 @@ class PrivateClass
 {
 	public function PrivateClass()
 	{
-		trace("包外类，用于实现单例");
+		//trace("包外类，用于实现单例");
 	}
 }

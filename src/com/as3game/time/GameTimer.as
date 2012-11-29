@@ -1,4 +1,4 @@
-package com.as3game.timer 
+package com.as3game.time 
 {
 	/**
 	 * ...
