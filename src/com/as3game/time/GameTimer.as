@@ -1,6 +1,8 @@
 package com.as3game.time
 {
+	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
+	import flash.utils.Timer;
 	
 	/**
 	 * ...
@@ -9,7 +11,7 @@ package com.as3game.time
 	public class GameTimer
 	{
 		
-		static function getInstance():GameTimer
+		static public function getInstance():GameTimer
 		{
 			if (m_instance == null)
 			{
@@ -18,15 +20,35 @@ package com.as3game.time
 			return m_instance;
 		}
 		
-		function register(name:String, interval:Number, repeatCount:int, callback:Function):void
+		public function destroy():void
+		{
+			
+			if (m_timer != null)
+			{
+				m_timer.stop();
+				m_timer.removeEventListener(TimerEvent.TIMER, onTimerManager, false);
+			}
+			
+			m_instance = null;
+			m_timerDic = null;
+			m_timer = null;
+		}
+		
+		/**
+		 * 注册定时器
+		 * @param	name
+		 * @param	interval
+		 * @param	repeatCount
+		 * @param	callback
+		 */
+		public function register(name:String, interval:Number, repeatCount:int, callback:Function):void
 		{
 			if (m_timerDic[name] == null)
 			{
 				m_timerDic[name] = new TimerObject(name, interval, repeatCount, callback);
-				//如果字典中只有一个TimerObject对象
-				if (timerNum == 1) 
+				if (!m_timer.running)
 				{
-					
+					m_timer.start();
 				}
 			}
 			else
@@ -35,12 +57,21 @@ package com.as3game.time
 			}
 		}
 		
-		function unregister(name:String):void
+		/**
+		 * 注销定时器
+		 * @param	name
+		 */
+		public function unregister(name:String):void
 		{
-		
+			delete m_timerDic[name];
+			
+			if (timerNum == 0)
+			{
+				m_timer.stop();
+			}
 		}
 		
-		public function GameTimer()
+		public function GameTimer(pvt:PrivateClass)
 		{
 			if (m_instance != null)
 			{
@@ -48,6 +79,23 @@ package com.as3game.time
 			}
 			
 			m_timerDic = new Dictionary(true);
+			m_timer = new Timer(TIMER_INTERVAL);
+			m_timer.addEventListener(TimerEvent.TIMER, onTimerManager, false, 0, true);
+		}
+		
+		private function onTimerManager(e:TimerEvent):void
+		{
+			for each (var timer:TimerObject in m_timerDic)
+			{
+				timer.timeElapse += TIMER_INTERVAL;
+				timer.handler();
+				
+				if (timer.repeatCount != 0 && timer.currCount == timer.repeatCount)
+				{
+					//定时器任务完成，注销定时器
+					unregister(timer.name);
+				}
+			}
 		}
 		
 		private function get timerNum():uint
@@ -61,7 +109,10 @@ package com.as3game.time
 		}
 		
 		static private var m_instance:GameTimer;
+		private var m_timer:Timer;
 		private var m_timerDic:Dictionary;
+		
+		private const TIMER_INTERVAL:int = 100; //100ms
 	}
 
 }
