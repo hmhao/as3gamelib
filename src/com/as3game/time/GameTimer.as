@@ -71,6 +71,17 @@ package com.as3game.time
 			}
 		}
 		
+				
+		public function get interval():int 
+		{
+			return m_interval;
+		}
+		
+		public function set interval(value:int):void 
+		{
+			m_interval = value;
+		}
+		
 		public function GameTimer(pvt:PrivateClass)
 		{
 			if (m_instance != null)
@@ -79,7 +90,7 @@ package com.as3game.time
 			}
 			
 			m_timerDic = new Dictionary(true);
-			m_timer = new Timer(TIMER_INTERVAL);
+			m_timer = new Timer(m_interval);
 			m_timer.addEventListener(TimerEvent.TIMER, onTimerManager, false, 0, true);
 		}
 		
@@ -87,7 +98,7 @@ package com.as3game.time
 		{
 			for each (var timer:TimerObject in m_timerDic)
 			{
-				timer.timeElapse += TIMER_INTERVAL;
+				timer.timeElapse += m_interval;
 				timer.handler();
 				
 				if (timer.repeatCount != 0 && timer.currCount == timer.repeatCount)
@@ -112,7 +123,7 @@ package com.as3game.time
 		private var m_timer:Timer;
 		private var m_timerDic:Dictionary;
 		
-		private const TIMER_INTERVAL:int = 100; //100ms
+		private var m_interval:int = 100; //100ms
 	}
 
 }

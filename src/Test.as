@@ -56,6 +56,10 @@ package
 			{
 				GameTimer.getInstance().unregister("test2");
 			}
+			else if (currentCount  == 2) 
+			{
+				GameTimer.getInstance().interval = 50;
+			}
 		}
 		
 		//private function backGroundMusic(e:MouseEvent):void 

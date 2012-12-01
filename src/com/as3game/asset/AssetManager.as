@@ -92,10 +92,15 @@ package com.as3game.asset
 			}
 		}
 		
-		public function getClassByName(clsName:String):Class
+		public function getContent(key:String, clearMemory:Boolean = false):*
+		{
+			return bulkLoader.getContent(key, clearMemory);
+		}
+		
+		public function getClassByName(clsName:String, domain:ApplicationDomain = null):Class
 		{
 			var cls:Class = null;
-			var appDomain:ApplicationDomain = ApplicationDomain.currentDomain;
+			var appDomain:ApplicationDomain = (domain != null) ? domain : ApplicationDomain.currentDomain;
 			if (appDomain.hasDefinition(clsName))
 			{
 				cls = appDomain.getDefinition(clsName) as Class;
