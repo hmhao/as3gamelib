@@ -40,8 +40,18 @@ package
 			//mc && addChild(mc);
 			//});
 			
-			GameTimer.getInstance().register("test1", 100, 5, testTimer1);
-			GameTimer.getInstance().register("test2", 200, 0, testTimer2);
+			//GameTimer.getInstance().register("test1", 100, 5, testTimer1);
+			//GameTimer.getInstance().register("test2", 200, 0, testTimer2);
+			
+			var i:Number = 710.5;
+			if (i < 0)
+			{
+				trace(360 + i % 360);
+			}
+			else 
+			{
+				trace(i % 360);
+			}
 		}
 		
 		private function testTimer1(currentCount:int):void
@@ -52,11 +62,11 @@ package
 		private function testTimer2(currentCount:int):void
 		{
 			trace("[定时器]test2。。。。。。。。" + currentCount);
-			if (currentCount == 100) 
+			if (currentCount == 100)
 			{
 				GameTimer.getInstance().unregister("test2");
 			}
-			else if (currentCount  == 2) 
+			else if (currentCount == 2)
 			{
 				GameTimer.getInstance().interval = 50;
 			}
