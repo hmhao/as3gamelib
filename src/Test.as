@@ -43,15 +43,13 @@ package
 			//GameTimer.getInstance().register("test1", 100, 5, testTimer1);
 			//GameTimer.getInstance().register("test2", 200, 0, testTimer2);
 			
-			var i:Number = 710.5;
-			if (i < 0)
-			{
-				trace(360 + i % 360);
-			}
-			else 
-			{
-				trace(i % 360);
-			}
+			trace(AssetManager.getInstance().registerNewType(".dat", AssetManager.TYPE_ZIP, AssetManager.CLASS_BINARY));
+			AssetManager.getInstance().getAsset('config.dat', testDat);
+		}
+		
+		private function testDat(content:*):void 
+		{
+			var i:int = 1;
 		}
 		
 		private function testTimer1(currentCount:int):void
