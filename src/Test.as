@@ -3,6 +3,7 @@ package
 	import com.as3game.asset.AssetManager;
 	import com.as3game.sound.GameSound;
 	import com.as3game.time.GameTimer;
+	import com.as3game.utils.BitUtil;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -45,6 +46,17 @@ package
 			
 			trace(AssetManager.getInstance().registerNewType(".dat", AssetManager.TYPE_ZIP, AssetManager.CLASS_BINARY));
 			AssetManager.getInstance().getAsset('config.dat', testDat);
+			
+			var arr:Array = BitUtil.getBits(18);
+			for each (var item:uint in arr) 
+			{
+				trace(item);
+			}
+			
+			trace(BitUtil.getBitValue(5, 18));
+			trace(BitUtil.getBitValue(8, 18));
+			trace(BitUtil.getBitValue(1, 18));
+			trace(BitUtil.getBitValue(2, 18));
 		}
 		
 		private function testDat(content:*):void 
