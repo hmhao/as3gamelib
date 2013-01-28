@@ -37,7 +37,7 @@ package com.as3game.utils
 		 */
 		static public function enterFullScreen():void
 		{
-			if (stageIsValid)
+			if (isStageValid)
 			{
 				m_stage.displayState = StageDisplayState.FULL_SCREEN;
 			}
@@ -48,7 +48,7 @@ package com.as3game.utils
 		 */
 		static public function exitFullScreen():void
 		{
-			if (stageIsValid)
+			if (isStageValid)
 			{
 				m_stage.displayState = StageDisplayState.NORMAL;
 			}
@@ -59,7 +59,7 @@ package com.as3game.utils
 		 */
 		static public function get isFullScreen():Boolean
 		{
-			if (stageIsValid)
+			if (isStageValid)
 			{
 				return m_stage.displayState == StageDisplayState.FULL_SCREEN;
 			}

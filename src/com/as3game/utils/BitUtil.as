@@ -21,8 +21,28 @@ package com.as3game.utils
 			{
 				throw new Error("bit 必须大于0");
 			}
-			value >>= (bit - 1);
+			value >>= bit;
 			return value & 1;
+		}
+		
+		/**
+		 * 将对应的二进制位置为1或0
+		 * @param	bit 第几位
+		 * @param	flag 1或0
+		 * @param	value
+		 * @return
+		 */
+		public static function setBitValue(bit:uint, flag:uint, val:int):uint 
+		{
+			if (flag) 
+			{
+				val |= (1 << bit);
+			}
+			else 
+			{
+				val &= (1 << bit);
+			}
+			return val;
 		}
 		
 		/**
