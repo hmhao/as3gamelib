@@ -1,6 +1,7 @@
 package com.as3game.asset
 {
 	import br.com.stimuli.loading.BulkLoader;
+	import br.com.stimuli.loading.loadingtypes.BinaryItem;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -118,6 +119,27 @@ package com.as3game.asset
 			return null;
 		}
 		
+		/**
+		 * Register a new file extension to be loaded as a given type. This is used both in the guessing of types from the url and affects how loading is done for each type.
+		 *   If you are adding an extension to be of a type you are creating, you must pass the <code>withClass</code> parameter, which should be a class that extends LoadingItem.
+		 *   @param  extension   The file extension to be used (can include the dot or not)
+		 *   @param  atType      Which type this extension will be associated with.
+		 *   @param  withClass   For new types (not new extensions) wich class that extends LoadingItem should be used to mange this item.
+		 *   @see #TYPE_IMAGE
+		 *   @see #TYPE_VIDEO
+		 *   @see #TYPE_SOUND
+		 *   @see #TYPE_TEXT
+		 *   @see #TYPE_XML
+		 *   @see #TYPE_MOVIECLIP
+		 *   @see #LoadingItem
+		 *
+		 *   @return A <code>Boolean</code> indicating if the new extension was registered.
+		 */
+		public function registerNewType(extension:String, atType:String, withClass:Class = null):Boolean
+		{
+			return BulkLoader.registerNewType(extension, atType, withClass);
+		}
+		
 		public function get bulkLoader():BulkLoader
 		{
 			return m_bulkLoader;
@@ -207,8 +229,10 @@ package com.as3game.asset
 			m_items = new Dictionary(true);
 		}
 		
-		private static var m_instance:AssetManager;
+		public static const TYPE_ZIP:String = "zip"; //文件类型
+		public static const CLASS_BINARY:Class = BinaryItem; //二进制格式解析类
 		
+		private static var m_instance:AssetManager;
 		private var m_bulkLoader:BulkLoader;
 		private var m_items:Dictionary;
 	}

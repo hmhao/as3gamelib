@@ -19,11 +19,11 @@ package com.as3game.time
 		
 		public function handler():void
 		{
-			trace("[定时器]" + m_name + " time elapse: " + m_timeElapse);
+			//trace("[定时器]" + m_name + " time elapse: " + m_timeElapse);
 			//达到指定时间间隔，执行回调函数
 			if (m_interval == m_timeElapse)
 			{
-				trace("[定时器]" + m_name + "执行");
+				//trace("[定时器]" + m_name + "执行");
 				m_timeElapse = 0;
 				m_currCount++;
 				m_callback && m_callback(m_currCount);
