@@ -123,7 +123,7 @@ package com.as3game.time
 		private var m_timer:Timer;
 		private var m_timerDic:Dictionary;
 		
-		private var m_interval:int = 100; //100ms
+		private var m_interval:int = 20; //100ms
 	}
 
 }

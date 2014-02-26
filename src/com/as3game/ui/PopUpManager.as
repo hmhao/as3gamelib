@@ -1,8 +1,5 @@
 package com.as3game.ui
 {
-	import com.greensock.easing.Back;
-	import com.greensock.TweenLite;
-	import com.greensock.TweenMax;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Graphics;
@@ -147,15 +144,15 @@ package com.as3game.ui
 			//popUp.x = point.x;
 			//popUp.y = point.y;
 			
-			popUp.scaleX = 0.5;
-			popUp.scaleY = 0.5;
+			//popUp.scaleX = 0.5;
+			//popUp.scaleY = 0.5;
 			popUp.x = (_stage.stage.stageWidth - popUp.width) / 2;
 			popUp.y = (_stage.stage.stageHeight - popUp.height) / 2;
 			
-			TweenMax.to(popUp, .3, {x: point.x, y: point.y, scaleX: 1, scaleY: 1, ease: Back.easeOut, onComplete: function():void
-				{
-				//
-				}});
+			//TweenMax.to(popUp, .3, {x: point.x, y: point.y, scaleX: 1, scaleY: 1, ease: Back.easeOut, onComplete: function():void
+			//{
+			//
+			//}});
 			
 			if (popUp is Sprite && popUp.hasOwnProperty('headArea'))
 			{
@@ -327,16 +324,16 @@ package com.as3game.ui
 				
 				if (popUp)
 				{
-					//popUp.parent.removeChild(popUp);
-					TweenLite.to(popUp, .2, {x: (_stage.stage.stageWidth - popUp.width * 0.5) / 2, y: (_stage.stage.stageHeight - popUp.height * 0.5) / 2, scaleX: 0.5, scaleY: 0.5, ease: Back.easeIn, onComplete: function():void
-						{
-							if (popUp.parent)
-							{
-								popUp.scaleX = 1;
-								popUp.scaleY = 1;
-								popUp.parent.removeChild(popUp);
-							}
-						}})
+					popUp.parent.removeChild(popUp);
+						//TweenLite.to(popUp, .2, {x: (_stage.stage.stageWidth - popUp.width * 0.5) / 2, y: (_stage.stage.stageHeight - popUp.height * 0.5) / 2, scaleX: 0.5, scaleY: 0.5, ease: Back.easeIn, onComplete: function():void
+						//{
+						//if (popUp.parent)
+						//{
+						//popUp.scaleX = 1;
+						//popUp.scaleY = 1;
+						//popUp.parent.removeChild(popUp);
+						//}
+						//}})
 				}
 				
 			}

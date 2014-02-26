@@ -32,20 +32,20 @@ package
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
-			stage.addEventListener(MouseEvent.CLICK, backGroundMusic);
+			//stage.addEventListener(MouseEvent.CLICK, backGroundMusic);
 			
-			GameSound.getInstance().playSound("res/music/background1.mp3");
-			//AssetManager.getInstance().getAsset("res/MainView.swf", function ():void 
-			//{
-			//var mc:MovieClip = AssetManager.getInstance().getMovieClipByName("MainView.ToolsBar");
-			//mc && addChild(mc);
-			//});
+			//GameSound.getInstance().playSound("res/music/background1.mp3");
+			AssetManager.getInstance().getAsset("res/MainView.swf", function ():void 
+			{
+			var mc:MovieClip = AssetManager.getInstance().getMovieClipByName("MainView.ToolsBar");
+			mc && addChild(mc);
+			});
 			
 			//GameTimer.getInstance().register("test1", 100, 5, testTimer1);
 			//GameTimer.getInstance().register("test2", 200, 0, testTimer2);
 			
-			trace(AssetManager.getInstance().registerNewType(".dat", AssetManager.TYPE_ZIP, AssetManager.CLASS_BINARY));
-			AssetManager.getInstance().getAsset('config.dat', testDat);
+			//trace(AssetManager.getInstance().registerNewType(".dat", AssetManager.TYPE_ZIP, AssetManager.CLASS_BINARY));
+			//AssetManager.getInstance().getAsset('config.dat', testDat);
 			
 			var arr:Array = BitUtil.getBits(18);
 			for each (var item:uint in arr)

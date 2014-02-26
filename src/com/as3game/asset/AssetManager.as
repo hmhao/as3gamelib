@@ -1,7 +1,10 @@
 package com.as3game.asset
 {
 	import br.com.stimuli.loading.BulkLoader;
+	import br.com.stimuli.loading.BulkProgressEvent;
 	import br.com.stimuli.loading.loadingtypes.BinaryItem;
+	import br.com.stimuli.loading.loadingtypes.LoadingItem;
+	import com.as3game.event.GameEvent;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -9,6 +12,7 @@ package com.as3game.asset
 	import flash.net.URLRequest;
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
+	import flash.system.SecurityDomain;
 	import flash.utils.Dictionary;
 	
 	/**
@@ -38,44 +42,66 @@ package com.as3game.asset
 			var isLoaded:Boolean = bulkLoader.hasItem(url);
 			if (!isLoaded)
 			{
-				//如果vars为空，则赋值{}
-				vars = (vars == null) ? vars = {} : vars;
-				//设置将资源加载到哪个域
-				if (!vars.hasOwnProperty("context"))
+				if (!bulkLoader.get(url))
 				{
-					if (BulkLoader.guessType(url) == BulkLoader.TYPE_SOUND)
+					//如果vars为空，则赋值{}
+					vars = (vars == null) ? vars = {} : vars;
+					//设置将资源加载到哪个域
+					if (!vars.hasOwnProperty("context"))
 					{
-						vars.context = new SoundLoaderContext();
+						if (BulkLoader.guessType(url) == BulkLoader.TYPE_SOUND)
+						{
+							vars.context = new SoundLoaderContext();
+						}
+						else
+						{
+							//设置默认将资源加载到当前域，方便后面使用
+							vars.context = new LoaderContext(false, ApplicationDomain.currentDomain, null);
+							
+						}
 					}
-					else
-					{
-						//设置默认将资源加载到当前域，方便后面使用
-						vars.context = new LoaderContext(false, ApplicationDomain.currentDomain, null);
-					}
+					//callback需要使用一个数组来存储
+					//因为可能一个资源没有加载完成的情况下，另一处同时请求这个资源，前面的回调会被覆盖而失效
+					m_items[url] = m_items[url] || {};
+					m_items[url].callback = m_items[url].callback || [];
+					m_items[url].callback.push(callback);
+					bulkLoader.add(url, vars);
+					bulkLoader.get(url).addEventListener(BulkLoader.COMPLETE, onItemComplete);
+					
+					bulkLoader.addEventListener(BulkLoader.COMPLETE, onAllComplete);
+					bulkLoader.addEventListener(BulkLoader.ERROR, onErrorHandler);
+					bulkLoader.addEventListener(BulkLoader.PROGRESS, onProgressHandler);
+					bulkLoader.addEventListener(BulkLoader.SECURITY_ERROR, onSecurityHandler);
+					bulkLoader.start();
 				}
-				//callback需要使用一个数组来存储
-				//因为可能一个资源没有加载完成的情况下，另一处同时请求这个资源，前面的回调会被覆盖而失效
-				m_items[url] = m_items[url] || {};
-				m_items[url].callback = m_items[url].callback || [];
-				m_items[url].callback.push(callback);
-				bulkLoader.add(url, vars);
-				bulkLoader.get(url).addEventListener(BulkLoader.COMPLETE, onItemComplete);
-				
-				bulkLoader.addEventListener(BulkLoader.COMPLETE, onAllComplete);
-				bulkLoader.addEventListener(BulkLoader.ERROR, onErrorHandler);
-				bulkLoader.addEventListener(BulkLoader.PROGRESS, onProgressHandler);
-				bulkLoader.addEventListener(BulkLoader.SECURITY_ERROR, onSecurityHandler);
-				bulkLoader.start();
+				else 
+				{
+					m_items[url].push(callback);
+				}
 			}
 			else
 			{
 				//已经加载过，从缓存读取
-				callback(bulkLoader.getContent(url));
+				if (callback.length > 1)
+				{
+					//一次加载一组资源
+					callback(m_items[url].group, m_items[url].groupCallback, url);
+				}
+				else
+				{
+					callback(bulkLoader.getContent(url));
+				}
 			}
 		}
 		
 		public function getGroupAssets(groupName:String, urls:Array, callback:Function, vars:Object = null):void
 		{
+			if (m_groupsDic[groupName] != null)
+			{
+				return;
+				throw new Error(groupName + " is already exist");
+			}
+			m_groupsDic[groupName] = { "urls": urls.slice(), "callback": callback };
 			for each (var url:String in urls)
 			{
 				if (!bulkLoader.hasItem(url))
@@ -88,14 +114,36 @@ package com.as3game.asset
 				}
 				else
 				{
-					onGroupItemComplete(groupName, callback)
+					if (bulkLoader.get(url).status == LoadingItem.STATUS_FINISHED)
+					{
+						var groupUrls:Array = m_groupsDic[groupName].urls;
+						var idx:int = groupUrls.indexOf(url);
+						if (idx != -1)
+						{
+							groupUrls.splice(idx, 1);
+						}
+						
+						if (groupUrls.length == 0)
+						{ //资源加载完成
+							delete m_groupsDic[groupName];
+							callback();
+							return;
+						}
+					}
+					else
+					{
+						m_items[url].group = groupName;
+						m_items[url].groupCallback = callback;
+						m_items[url].callback.push(onGroupItemComplete);
+					}
 				}
 			}
 		}
 		
 		public function getContent(key:String, clearMemory:Boolean = false):*
 		{
-			return bulkLoader.getContent(key, clearMemory);
+			var loader:BulkLoader = BulkLoader.whichLoaderHasItem(key)
+			return loader.getContent(key, clearMemory);
 		}
 		
 		public function getClassByName(clsName:String, domain:ApplicationDomain = null):Class
@@ -161,10 +209,20 @@ package com.as3game.asset
 			delete m_items[request.url];
 			for each (var callback:Function in itemObj.callback)
 			{
-				if (callback.length == 2)
+				if (callback.length > 1)
 				{
 					//一次加载一组资源
-					callback(itemObj.group, itemObj.groupCallback);
+					//callback(itemObj.group, itemObj.groupCallback, request.url);
+					for (var groupName:String in m_groupsDic) 
+					{
+						for each(var item:String in m_groupsDic[groupName].urls) 
+						{
+							if (item == request.url) 
+							{
+								callback(groupName, m_groupsDic[groupName].callback, request.url);
+							}
+						}
+					}
 				}
 				else
 				{
@@ -173,21 +231,31 @@ package com.as3game.asset
 			}
 			
 			bulkLoader.get(request.url).removeEventListener(BulkLoader.COMPLETE, onItemComplete);
+			
+			dispatchEvent(new GameEvent(Event.COMPLETE, {"target": e.target}));
 		}
 		
-		private function onGroupItemComplete(groupName:String, groupCallback:Function):void
+		private function onGroupItemComplete(groupName:String, groupCallback:Function, url:String):void
 		{
-			for each (var item:Object in m_items)
+			var groupUrls:Array = m_groupsDic[groupName].urls;
+			if (groupUrls != null)
 			{
-				if (item.group == groupName)
+				var idx:int = groupUrls.indexOf(url);
+				if (idx != -1)
 				{
-					//组里面还有资源没有加载完成
-					return;
+					groupUrls.splice(idx, 1);
+				}
+				
+				if (groupUrls.length == 0)
+				{ //资源加载完成
+					delete m_groupsDic[groupName];
+					groupCallback();
 				}
 			}
-			
-			//组里面资源加载完成
-			groupCallback();
+			else 
+			{
+				trace("group: ", groupName, "找不到")
+			}
 		}
 		
 		private function onAllComplete(e:Event):void
@@ -225,8 +293,14 @@ package com.as3game.asset
 				throw new Error("AssetManager is a Singleton class. Use getInstance() to retrieve the existing instance.");
 			}
 			
-			m_bulkLoader = new BulkLoader('AssetManager');
+			//m_bulkLoader = new BulkLoader('utils');
+			m_bulkLoader = BulkLoader.getLoader("utils");
+			if (m_bulkLoader == null)
+			{
+				m_bulkLoader = new BulkLoader('utils');
+			}
 			m_items = new Dictionary(true);
+			m_groupsDic = new Dictionary(true);
 		}
 		
 		public static const TYPE_ZIP:String = "zip"; //文件类型
@@ -235,6 +309,7 @@ package com.as3game.asset
 		private static var m_instance:AssetManager;
 		private var m_bulkLoader:BulkLoader;
 		private var m_items:Dictionary;
+		private var m_groupsDic:Dictionary;
 	}
 }
 
